@@ -6,8 +6,7 @@ $EMAIL_SUBJECT = 'Synology: nsupdate';
 $EMAIL_BODY = "Script ".$argv[0]."\n";
 $EMAIL_TO = 'xxx@gmail.com';
 
-
-$LOGFILE = 'log_php.txt';
+$LOGFILE = getcwd().'/log_php.txt';
 
 $USER = 'xxx';
 $PASSWORD = 'xxx';
@@ -16,6 +15,9 @@ $dominios = array(
     'example.com'    => 'fotos',
     'example.gal'         => 'alex'
 );
+
+// envio de email, para enviar so emails quando seja necessario
+$enviarEmail = false;
 
 file_put_contents($LOGFILE, "[".date("Y-m-d H:i:s")."] --- --- ---\n", FILE_APPEND);
 file_put_contents($LOGFILE, "[".date("Y-m-d H:i:s")."] Comezo\n", FILE_APPEND);
@@ -64,6 +66,8 @@ foreach($dominios as $dominio => $host) {
 
     file_put_contents($LOGFILE, "[".date("Y-m-d H:i:s")."] \t response: ".$res."\n", FILE_APPEND);
 
+    $enviarEmail = true;
+
     // check response    
     $data = json_decode($res, true);
     file_put_contents($LOGFILE, "[".date("Y-m-d H:i:s")."] \t date: ".var_export($data, true)."\n", FILE_APPEND);
@@ -78,4 +82,7 @@ foreach($dominios as $dominio => $host) {
     }
 }
 
-mail($EMAIL_TO, $EMAIL_SUBJECT, $EMAIL_BODY);
+// enviamos email se hai cambios ou cada duas horas
+if($enviarEmail || date("G") % 2 == 0 ) {
+    mail($EMAIL_TO, $EMAIL_SUBJECT, $EMAIL_BODY);
+}
